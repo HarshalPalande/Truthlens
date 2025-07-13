@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TruthLens Chat</title>
+  <link rel="stylesheet" href="/static/chat.css" />
+  <style>
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background: #2d2d2d;
+      padding: 15px 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border-bottom: 1px solid #444;
+    }
+
+    .chat-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .message.user {
+      text-align: right;
+      color: #00c6ff;
+    }
+
+    .message.ai {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 90%;
+    }
+
+    /* NEW Bottom Fixed Input */
+    .bottom-input {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      background: #2d2d2d;
+      border-top: 1px solid #444;
+      gap: 10px;
+    }
+
+    textarea.input-text {
+      width: 100%;
+      max-width: 800px;
+      padding: 12px;
+      border-radius: 8px;
+      resize: none;
+      border: none;
+      background: #1f1f1f;
+      color: white;
+      font-size: 1rem;
+      height: 80px;
+    }
+
+    button.send-btn {
+      background: #00c6ff;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .plus-upload {
+      position: relative;
+      display: inline-block;
+    }
+
+    .plus-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .plus-icon {
+      background: #1f1f1f;
+      border-radius: 50%;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      line-height: 40px;
+      cursor: pointer;
+      border: 1px solid #444;
+      color: white;
+    }
+
+    select {
+      background: #1f1f1f;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    @media (max-width: 600px) {
+      textarea.input-text {
+        height: 60px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="header">🧠 TruthLens</div>
+
+    <div class="chat-box" id="chat-box">
+      {% if user_input %}
+        <div class="message user"><strong>You:</strong> {{ user_input }}</div>
+        <div class="message ai">
+          <strong>{{ persona_label }}:</strong><br>
+          🧭 <b>Bias</b>: {{ bias }}<br>
+          📈 <b>Confidence</b>: {{ confidence }}<br>
+          🔥 <b>Sensationalism</b>: {{ sensational }}<br>
+          🏛️ <b>Reputation</b>: {{ reputation }}<br>
+          🧠 <b>Summary</b>: {{ summary }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ✅ Bottom Center Chat Input -->
+    <form method="POST" action="/" enctype="multipart/form-data" class="bottom-input">
+      <div class="plus-upload">
+        <span class="plus-icon">+</span>
+        <input type="file" name="pdf" accept=".pdf">
+      </div>
+
+      <textarea name="text" class="input-text" placeholder="Paste news article or URL..."></textarea>
+
+      <select name="persona">
+        <option value="neutral">🤖 Neutral AI</option>
+        <option value="professor">🎓 Media Professor</option>
+        <option value="detective">🕵️ Fact Detective</option>
+      </select>
+
+      <button type="submit" class="send-btn">Analyze</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TruthLens — Results</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Analysis Results</h1>
+    <div class="result-box">
+      <p><strong>🧭 Political Bias:</strong> {{ bias }}</p>
+      <p><strong>📈 Confidence:</strong> {{ confidence }}</p>
+      <p><strong>🔥 Sensationalism Score:</strong> {{ sensational }}/100</p>
+      <p><strong>🧠 Neutral Summary:</strong></p>
+      <p class="summary">{{ summary }}</p>
+    </div>
+    <a href="/" class="back-button">← Analyze Another Article</a>
+  </div>
+</body>
+</html>
