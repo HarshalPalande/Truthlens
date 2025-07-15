@@ -1,6 +1,6 @@
 flask
 transformers
 torch
-PyMuPDF
+PyMuPDF==1.22.5
 newspaper3k
 nltk
