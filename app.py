@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 from transformers import pipeline
 from urllib.parse import urlparse
-import fitz  # PyMuPDF
+import fitz  # ✅ still okay
 from newspaper import Article
 import os
 import re
