@@ -3,4 +3,5 @@ transformers
 torch
 newspaper3k
 nltk
-lxml[html_clean]
+lxml
+lxml-html-clean
