@@ -76,34 +76,6 @@
       border-radius: 6px;
     }
 
-    .plus-upload {
-      position: relative;
-      display: inline-block;
-    }
-
-    .plus-upload input[type="file"] {
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-    }
-
-    .plus-icon {
-      background: #1f1f1f;
-      border-radius: 50%;
-      font-size: 24px;
-      width: 40px;
-      height: 40px;
-      text-align: center;
-      line-height: 40px;
-      cursor: pointer;
-      border: 1px solid #444;
-      color: white;
-    }
-
     select {
       background: #1f1f1f;
       color: white;
@@ -145,12 +117,6 @@
 
     <!-- ✅ Bottom Center Chat Input -->
     <form method="POST" action="/" enctype="multipart/form-data" class="bottom-input">
-      <div class="plus-upload">
-        <span class="plus-icon">+</span>
-        <input type="file" name="pdf" accept=".pdf" onchange="showUploadMessage(this)">
-      </div>
-    
-      <div id="upload-msg" style="display: none; color: green; font-size: 0.95rem; margin-top: 5px; margin-left: 8px;"></div>
     
       <textarea name="text" class="input-text" placeholder="Paste news article or URL..."></textarea>
     
