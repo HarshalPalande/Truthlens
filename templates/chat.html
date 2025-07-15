@@ -122,39 +122,62 @@
 </head>
 <body>
   <div class="chat-container">
-    <div class="header">🧠 TruthLens</div>
+    <div class="header">TruthLens</div>
 
     <div class="chat-box" id="chat-box">
       {% if user_input %}
-        <div class="message user"><strong>You:</strong> {{ user_input }}</div>
+        <div class="message user">
+          <strong>You:</strong> {{ user_input }}
+        </div>
         <div class="message ai">
           <strong>{{ persona_label }}:</strong><br>
           🧭 <b>Bias</b>: {{ bias }}<br>
           📈 <b>Confidence</b>: {{ confidence }}<br>
           🔥 <b>Sensationalism</b>: {{ sensational }}<br>
-          🏛️ <b>Reputation</b>: {{ reputation }}<br>
+          {% if reputation %}
+            🏛️ <b>Reputation</b>: {{ reputation }}<br>
+          {% endif %}
           🧠 <b>Summary</b>: {{ summary }}
         </div>
       {% endif %}
     </div>
+    
 
     <!-- ✅ Bottom Center Chat Input -->
     <form method="POST" action="/" enctype="multipart/form-data" class="bottom-input">
       <div class="plus-upload">
         <span class="plus-icon">+</span>
-        <input type="file" name="pdf" accept=".pdf">
+        <input type="file" name="pdf" accept=".pdf" onchange="showUploadMessage(this)">
       </div>
-
+    
+      <div id="upload-msg" style="display: none; color: green; font-size: 0.95rem; margin-top: 5px; margin-left: 8px;"></div>
+    
       <textarea name="text" class="input-text" placeholder="Paste news article or URL..."></textarea>
-
+    
       <select name="persona">
         <option value="neutral">🤖 Neutral AI</option>
         <option value="professor">🎓 Media Professor</option>
         <option value="detective">🕵️ Fact Detective</option>
       </select>
-
+    
       <button type="submit" class="send-btn">Analyze</button>
     </form>
-  </div>
+    
+
+
+    <script>
+      function showUploadMessage(input) {
+        const file = input.files[0];
+        const msgBox = document.getElementById("upload-msg");
+        if (file) {
+          msgBox.innerText = `📂 Uploaded "${file.name}" successfully.`;
+          msgBox.style.display = "block";
+        } else {
+          msgBox.style.display = "none";
+        }
+      }
+      </script>
+      
+    
 </body>
 </html>

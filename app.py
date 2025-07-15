@@ -4,6 +4,13 @@ from urllib.parse import urlparse
 import fitz  # PyMuPDF
 from newspaper import Article
 import os
+import re
+from transformers import pipeline
+from nltk.corpus import stopwords
+import nltk
+
+nltk.download("stopwords")
+stop_words = set(stopwords.words("english"))
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "uploads"
@@ -12,8 +19,19 @@ app.config['UPLOAD_FOLDER'] = "uploads"
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Hardcoded reputation scores
+# Reputation scores
 news_reputation = {
+    "thehindu.com": "High",           
+    "thehindubusinessline.com": "Medium",  
+    "indiatoday.in": "Medium",       
+    "opindia.com": "Medium",         
+    "news18.com": "Low",            
+    "ltn.com.tw": "Medium",      
+    "udn.com": "Medium",         
+    "mingpao.com.hk": "High",        
+    "hkfp.com": "Medium",             
+    "scmp.com": "High",             
+    "inmediahk.net": "High",          
     "bbc.com": "High",
     "cnn.com": "Medium",
     "foxnews.com": "Medium",
@@ -31,8 +49,8 @@ summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 # Persona labels
 persona_labels = {
     "neutral": "🤖 Neutral AI",
-    "professor": "🎓 Media Professor",
-    "detective": "🕵️ Fact Detective"
+    "professor": "📘 Explains News Clearly",
+    "detective": "🔍 Checks Facts Deeply"
 }
 
 # Predict bias
@@ -52,13 +70,18 @@ def sensationalism_score(text):
 
 
 # Generate summary with persona
-def generate_summary(text, persona):
+def generate_summary(text, persona, reputation=None):
     result = summarizer(text, max_length=100, min_length=25, do_sample=False)
     summary = result[0]['summary_text']
+
     if persona == "professor":
-        summary = f"As a professor, I'd explain it this way: {summary}"
+        summary = simplify_text(summary)
+        summary = f"As a professor, let me break it down simply:\n\n{summary}"
+
     elif persona == "detective":
-        summary = f"Upon inspection, this is the essence: {summary}"
+        summary = highlight_keywords(summary)
+        summary = f"After close inspection, here’s the essence:\n\n{summary}"
+
     return summary
 
 # Source credibility checker
@@ -72,7 +95,7 @@ def check_source_reputation(text):
         pass
     return "Unknown"
 
-# Extract article from URL using newspaper3k
+# Extracts article from URL using newspaper3k
 def extract_text_from_url(url):
     try:
         article = Article(url)
@@ -81,6 +104,122 @@ def extract_text_from_url(url):
         return article.text
     except Exception as e:
         return f"❌ Failed to extract article: {e}"
+    
+def simplify_text(text):
+    replacements = {
+    "e.g.": "for example",
+    "i.e.": "that is",
+    "significant": "important",
+    "utilize": "use",
+    "utilization": "use",
+    "approximately": "about",
+    "individuals": "people",
+    "commence": "start",
+    "terminate": "end",
+    "prior to": "before",
+    "subsequent to": "after",
+    "assistance": "help",
+    "inquire": "ask",
+    "purchase": "buy",
+    "numerous": "many",
+    "demonstrate": "show",
+    "facilitate": "make easier",
+    "sufficient": "enough",
+    "insufficient": "not enough",
+    "endeavor": "try",
+    "indicate": "show",
+    "initiate": "start",
+    "conclude": "end",
+    "obtain": "get",
+    "objective": "goal",
+    "predominantly": "mostly",
+    "methodology": "method",
+    "component": "part",
+    "substantial": "large",
+    "comprehend": "understand",
+    "articulate": "explain clearly",
+    "analyze": "examine",
+    "interpret": "explain",
+    "validate": "confirm",
+    "necessitate": "require",
+    "implement": "put into action",
+    "acknowledge": "admit",
+    "proficient": "skilled",
+    "demographic": "group",
+    "controversial": "disputed",
+    "authentic": "real",
+    "acquire": "get",
+    "allocate": "give",
+    "consume": "use",
+    "determine": "decide",
+    "evaluate": "judge",
+    "implication": "consequence",
+    "mandatory": "required",
+    "voluntary": "optional",
+    "compile": "gather",
+    "disseminate": "share",
+    "fluctuate": "change",
+    "impede": "slow down",
+    "inhibit": "prevent",
+    "mitigate": "reduce",
+    "manifest": "show",
+    "convey": "express",
+    "pertain": "relate to",
+    "accompany": "go with",
+    "relevant": "related",
+    "coincide": "happen at the same time",
+    "reside": "live",
+    "subsequently": "later",
+    "emerge": "come out",
+    "perspective": "view",
+    "reiterate": "repeat",
+    "viable": "possible",
+    "optimize": "improve",
+    "constitute": "make up",
+    "adverse": "harmful",
+    "approximate": "about",
+    "indigenous": "native",
+    "prevalent": "common",
+    "synthesize": "combine",
+    "advocate": "support",
+    "detrimental": "harmful",
+    "eradicate": "remove",
+    "alleviate": "ease",
+    "feasible": "possible",
+    "paradigm": "model",
+    "parameter": "limit",
+    "contemporary": "modern",
+    "aggregate": "total",
+    "stipulate": "require",
+    "ameliorate": "improve",
+    "collaborate": "work together",
+    "assert": "claim",
+    "accomplish": "achieve",
+    "artificial": "man-made"
+}
+
+    for word, simple in replacements.items():
+        text = re.sub(rf"\b{word}\b", simple, text, flags=re.IGNORECASE)
+    
+    return text
+
+def highlight_keywords(text):
+    words = text.split()
+    important = []
+
+    for word in words:
+        clean = word.lower().strip(".,")
+        if clean not in stop_words and len(clean) > 5:
+            important.append(clean)
+
+    keywords = list(set(important[:6]))  
+    highlighted = text
+
+    for kw in keywords:
+        highlighted = re.sub(rf"\b({kw})\b", r"**\1**", highlighted, flags=re.IGNORECASE)
+
+    return highlighted
+
 
 # Extract text from PDF using PyMuPDF
 def extract_text_from_pdf(file_path):
@@ -109,7 +248,7 @@ def chat():
             pdf_file = request.files["pdf"]
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_file.filename)
             pdf_file.save(file_path)
-            text = extract_text_from_pdf(file_path)
+            text = extract_text_from_pdf(file_path) 
             os.remove(file_path)
 
         # Case 3: User typed or pasted raw text
@@ -121,8 +260,9 @@ def chat():
 
         bias, confidence = predict_bias(text)
         sensational = sensationalism_score(text)
-        summary = generate_summary(text, persona)
         reputation = check_source_reputation(text)
+        summary = generate_summary(text, persona, reputation if persona == "detective" else None)
+
 
         return render_template("chat.html",
                                user_input=text,
@@ -130,7 +270,7 @@ def chat():
                                confidence=f"{confidence}%",
                                sensational=sensational,
                                summary=summary,
-                               reputation=reputation,
+                               reputation=reputation if persona == "detective" else None,
                                persona_label=persona_labels.get(persona, "🤖 Neutral AI"))
     return render_template("chat.html")
 
