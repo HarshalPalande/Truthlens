@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request
 from transformers import pipeline
 from urllib.parse import urlparse
-import fitz  # ✅ still okay
 from newspaper import Article
 import os
 import re
-from transformers import pipeline
 from nltk.corpus import stopwords
 import nltk
 
@@ -13,11 +11,6 @@ nltk.download("stopwords")
 stop_words = set(stopwords.words("english"))
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = "uploads"
-
-# Ensure uploads folder exists
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 # Reputation scores
 news_reputation = {
@@ -220,18 +213,6 @@ def highlight_keywords(text):
 
     return highlighted
 
-
-# Extract text from PDF using PyMuPDF
-def extract_text_from_pdf(file_path):
-    try:
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-        return text
-    except Exception as e:
-        return f"❌ Failed to extract PDF: {e}"
-
 # Chat route
 @app.route("/", methods=["GET", "POST"])
 def chat():
@@ -243,15 +224,7 @@ def chat():
         if "url" in request.form and request.form["url"]:
             text = extract_text_from_url(request.form["url"])
 
-        # Case 2: User uploaded a PDF
-        elif "pdf" in request.files and request.files["pdf"]:
-            pdf_file = request.files["pdf"]
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_file.filename)
-            pdf_file.save(file_path)
-            text = extract_text_from_pdf(file_path) 
-            os.remove(file_path)
-
-        # Case 3: User typed or pasted raw text
+        # Case 2: User typed or pasted raw text
         elif "text" in request.form and request.form["text"]:
             text = request.form["text"]
 

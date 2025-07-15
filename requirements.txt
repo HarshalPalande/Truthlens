@@ -1,9 +1,5 @@
-Flask==3.1.1
-transformers==4.53.2
-torch==2.7.1
-newspaper3k==0.2.8
-nltk==3.9.1
-PyMuPDF==1.26.3
-beautifulsoup4==4.13.4
-requests==2.32.4
-tqdm==4.67.1
+Flask
+transformers
+torch
+newspaper3k
+nltk
