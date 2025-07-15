@@ -2,3 +2,5 @@ flask
 transformers
 torch
 PyMuPDF
+newspaper3k
+nltk
